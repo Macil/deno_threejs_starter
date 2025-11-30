@@ -34,6 +34,7 @@ cd deno_webgpu
 deno run -P src/without_build.ts
 ```
 
+if all goes well you should see a light blue box in a dark blue background with [OrbitControls](https://threejs.org/docs/#OrbitControls) working.
 ## Note
 - There is a [canvas.ts](./deno_webgpu/src/canvas.ts) file that polyfills the html canvas element. Threejs heavily relies on this canvas 
 to be present thus the need for emulation. To make it easier to idenitify which properties are being accessed there is a [logging-proxy.ts](./deno_webgpu/src/logging-proxy.ts)
