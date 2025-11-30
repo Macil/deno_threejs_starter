@@ -1,85 +1,42 @@
-# three.js
+# Deno X WebGPU X Three
 
-[![NPM Package][npm]][npm-url]
-[![Build Size][build-size]][build-size-url]
-[![NPM Downloads][npm-downloads]][npmtrends-url]
-[![jsDelivr Downloads][jsdelivr-downloads]][jsdelivr-url]
-[![Discord][discord]][discord-url]
+This is a fork of [Three.js](https://github.com/mrdoob/three.js/) that aims to test [Three.js's](https://github.com/mrdoob/three.js/) compatibility with [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) running on [Deno Window Manager](https://github.com/deno-windowing/dwm).
 
-#### JavaScript 3D library
+The test helps uncover what potential issues are there intergrating the three technologies which may serve as a starting point for creating an issue in the future.
 
-The aim of the project is to create an easy-to-use, lightweight, cross-browser, general-purpose 3D library. The current builds only include WebGL and WebGPU renderers but SVG and CSS3D renderers are also available as addons.
+In addition it also allows us to test against the latest version of threejs in which at the creation of this repository has some additional bug fixes that allow WebGPU to work well.
+So you can say it also allows us to test the bleeding version of [Three.js](https://github.com/mrdoob/three.js/) on the `dev` branch.
 
-[Examples](https://threejs.org/examples/) &mdash;
-[Docs](https://threejs.org/docs/) &mdash;
-[Manual](https://threejs.org/manual/) &mdash;
-[Wiki](https://github.com/mrdoob/three.js/wiki) &mdash;
-[Migrating](https://github.com/mrdoob/three.js/wiki/Migration-Guide) &mdash;
-[Questions](https://stackoverflow.com/questions/tagged/three.js) &mdash;
-[Forum](https://discourse.threejs.org/) &mdash;
-[Discord](https://discord.gg/56GBJwAnUS)
+With the two cases mention above the repo has two samples
+1. Running the threejs from the current build in [main.ts](./deno_webgpu/main.ts)
+2. Running the threejs from source [without_build.ts](./deno_webgpu/src/without_build.ts)
 
-### Usage
+[main.ts](./deno_webgpu/main.ts) - uses the latest build from threejs. This can be used just for running threejs as usual.
+[without_build.ts](./deno_webgpu/src/without_build.ts) - uses threejs straight from source. This can be used for debugging i.e you can at least
+jump into the source code and make some tweeks if need be.
 
-This code creates a scene, a camera, and a geometric cube, and it adds the cube to the scene. It then creates a `WebGL` renderer for the scene and camera, and it adds that viewport to the `document.body` element. Finally, it animates the cube within the scene for the camera.
 
-```javascript
-import * as THREE from 'three';
 
-const width = window.innerWidth, height = window.innerHeight;
 
-// init
+## Running
+This requires at least deno 2.5 since the [deno.lock](./deno_webgpu/deno.lock) file has the permissions already setup there.
 
-const camera = new THREE.PerspectiveCamera( 70, width / height, 0.01, 10 );
-camera.position.z = 1;
-
-const scene = new THREE.Scene();
-
-const geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
-const material = new THREE.MeshNormalMaterial();
-
-const mesh = new THREE.Mesh( geometry, material );
-scene.add( mesh );
-
-const renderer = new THREE.WebGLRenderer( { antialias: true } );
-renderer.setSize( width, height );
-renderer.setAnimationLoop( animate );
-document.body.appendChild( renderer.domElement );
-
-// animation
-
-function animate( time ) {
-
-	mesh.rotation.x = time / 2000;
-	mesh.rotation.y = time / 1000;
-
-	renderer.render( scene, camera );
-
-}
+To run the two samples
+[main.ts](./deno_webgpu/main.ts)
+```
+cd deno_webgpu
+deno run -P main.ts
 ```
 
-If everything goes well, you should see [this](https://jsfiddle.net/w43x5Lgh/).
-
-### Cloning this repository
-
-Cloning the repo with all its history results in a ~2 GB download. If you don't need the whole history you can use the `depth` parameter to significantly reduce download size.
-
-```sh
-git clone --depth=1 https://github.com/mrdoob/three.js.git
+[without_build.ts](./deno_webgpu/src/without_build.ts)
+```
+cd deno_webgpu
+deno run -P src/without_build.ts
 ```
 
-### Change log
-
-[Releases](https://github.com/mrdoob/three.js/releases)
-
-
-[npm]: https://img.shields.io/npm/v/three
-[npm-url]: https://www.npmjs.com/package/three
-[build-size]: https://badgen.net/bundlephobia/minzip/three
-[build-size-url]: https://bundlephobia.com/result?p=three
-[npm-downloads]: https://img.shields.io/npm/dw/three
-[npmtrends-url]: https://www.npmtrends.com/three
-[jsdelivr-downloads]: https://data.jsdelivr.com/v1/package/npm/three/badge?style=rounded
-[jsdelivr-url]: https://www.jsdelivr.com/package/npm/three
-[discord]: https://img.shields.io/discord/685241246557667386
-[discord-url]: https://discord.gg/56GBJwAnUS
+## Note
+- There is a [canvas.ts](./deno_webgpu/src/canvas.ts) file that polyfills the html canvas element. Threejs heavily relies on this canvas 
+to be present thus the need for emulation. To make it easier to idenitify which properties are being accessed there is a [logging-proxy.ts](./deno_webgpu/src/logging-proxy.ts)
+that is called in the [without_build.ts](./deno_webgpu/src/without_build.ts) to offer visibility on what threejs requires. This is helpful for when you are testing features and Threejs
+acceses a method/property that hasn't been defined.
+- Note the two files are just samplee which you can extend with your custom logic and build on that
