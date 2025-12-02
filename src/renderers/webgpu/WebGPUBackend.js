@@ -204,6 +204,8 @@ class WebGPUBackend extends Backend {
 
 		device.lost.then( ( info ) => {
 
+			if ( info.reason === 'destroyed' ) return;
+
 			const deviceLossInfo = {
 				api: 'WebGPU',
 				message: info.message || 'Unknown reason',
@@ -1665,7 +1667,9 @@ class WebGPUBackend extends Backend {
 
 					data[ 0 ] = i;
 
-					const bindGroupIndex = this.bindingUtils.createBindGroupIndex( data, bindingsData.layout );
+					const { layoutGPU } = bindingsData.layout;
+
+					const bindGroupIndex = this.bindingUtils.createBindGroupIndex( data, layoutGPU );
 
 					indexesGPU.push( bindGroupIndex );
 
@@ -2157,6 +2161,17 @@ class WebGPUBackend extends Backend {
 
 	}
 
+	/**
+	 * Delete data associated with the current bind group.
+	 *
+	 * @param {BindGroup} bindGroup - The bind group.
+	 */
+	deleteBindGroupData( bindGroup ) {
+
+		this.bindingUtils.deleteBindGroupData( bindGroup );
+
+	}
+
 	// attributes
 
 	/**
@@ -2486,7 +2501,36 @@ class WebGPUBackend extends Backend {
 
 	dispose() {
 
+		this.bindingUtils.dispose();
 		this.textureUtils.dispose();
+
+		if ( this.occludedResolveCache ) {
+
+			for ( const buffer of this.occludedResolveCache.values() ) {
+
+				buffer.destroy();
+
+			}
+
+			this.occludedResolveCache.clear();
+
+		}
+
+		if ( this.timestampQueryPool ) {
+
+			for ( const queryPool of Object.values( this.timestampQueryPool ) ) {
+
+				if ( queryPool !== null ) queryPool.dispose();
+
+			}
+
+		}
+
+		if ( this.parameters.device === undefined && this.device !== null ) {
+
+			this.device.destroy();
+
+		}
 
 	}
 
